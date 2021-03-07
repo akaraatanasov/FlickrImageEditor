@@ -37,12 +37,12 @@ final class MainCoordinator: Coordinator {
     private func startSelectImageFlow() {
         // init all select image components
         print("✅ Started Select Image Flow")
-//        let selectImageViewModel = SelectImageViewModel()
-//        let selectImageViewController = SelectImageViewController(viewModel: selectImageViewModel)
-//        let selectImageNavigationController = UINavigationController(rootViewController: selectImageViewController)
+        let selectImageViewModel = SelectImageViewModel()
+        let selectImageViewController = SelectImageViewController(viewModel: selectImageViewModel)
+        let selectImageNavigationController = UINavigationController(rootViewController: selectImageViewController)
         
         // attach the navigation controller
-//        rootViewController.attachChildController(selectImageNavigationController)
+        rootViewController.attachChildController(selectImageNavigationController)
         
         // setup view constraints to edges
         
