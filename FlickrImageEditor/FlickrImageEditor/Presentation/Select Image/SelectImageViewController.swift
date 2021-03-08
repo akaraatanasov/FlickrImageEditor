@@ -13,14 +13,6 @@ class SelectImageViewController: ViewController {
     
     @IBOutlet private weak var tableView: UITableView!
     
-    // MARK: - View State
-    
-    private var images: [FlickrImage] {
-        didSet {
-            tableView.reloadData()
-        }
-    }
-    
     // MARK: - View Model
     
     private let viewModel: SelectImageViewModel
@@ -28,7 +20,6 @@ class SelectImageViewController: ViewController {
     // MARK: - Init
     
     internal init(viewModel: SelectImageViewModel) {
-        self.images = []
         self.viewModel = viewModel
         super.init()
     }
@@ -53,12 +44,11 @@ class SelectImageViewController: ViewController {
                 case .initial:
                     self.tableView.setEmptyMessage("Welcome to Flickr Editor!")
                 case .loading(message: let message):
-                    self.images = []
-                    self.tableView.setEmptyMessage(message) // TODO: - Replace this with start loading indicator call
-                case .successfullyFetched(images: let images):
+                    // TODO: - Add start loading indicator call
+                    self.tableView.setEmptyMessage(message) // TODO: - Replace with .restore() when adding loading indicator
+                case .successfullyFetched(images: _):
                     // TODO: - Add stop loading indicator call
-                    self.images = images
-                    self.tableView.restore()
+                    self.tableView.restore() // TODO: - Remove
                 case .noResults:
                     // TODO: - Add stop loading indicator call
                     self.tableView.setEmptyMessage("No Results!")
@@ -79,7 +69,7 @@ class SelectImageViewController: ViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(didTapRefreshButton))
         // setup table view
         tableView.delegate = self
-        tableView.dataSource = self
+        tableView.dataSource = viewModel
     }
     
     
@@ -94,24 +84,14 @@ class SelectImageViewController: ViewController {
 // MARK: - Table View Delegate
 
 extension SelectImageViewController: UITableViewDelegate {
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         viewModel.imageSelected(at: indexPath)
         tableView.deselectRow(at: indexPath, animated: true)
     }
-}
-
-// MARK: - Table View Data Source
-
-extension SelectImageViewController: UITableViewDataSource {
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return images.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell()
-        cell.textLabel?.text = images[indexPath.row].title
-        return cell
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        return UIView()
     }
     
 }

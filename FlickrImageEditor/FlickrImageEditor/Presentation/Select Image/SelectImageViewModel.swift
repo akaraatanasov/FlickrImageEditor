@@ -10,56 +10,114 @@ import Combine
 
 class SelectImageViewModel: ViewModel<SelectImageState> {
     
-    // MARK: - Properties
+    // MARK: - Navigation Action
+
+    var didSelectImage: ((FlickrImage, UIImage?) -> Void)?
     
-//    private let flickrService: FlickrService // manages flickr requests
+    // MARK: - Services
+    
+    private let flickrService: FlickrService
+    private let imageService: ImageService
+    
+    // MARK: - Data
+    
+    private var images: [FlickrImage]
+    private var thumbnails: [String: UIImage?]
+    
+    // MARK: - State
     
     var statePublisher: AnyPublisher<SelectImageState, Never> {
         return state.receive(on: RunLoop.main).eraseToAnyPublisher()
     }
     
+    // MARK: - Init
+    
+    init(flickrService: FlickrService, imageService: ImageService) {
+        self.flickrService = flickrService
+        self.imageService = imageService
+        self.images = [FlickrImage]()
+        self.thumbnails = [String: UIImage]()
+        super.init()
+    }
+    
     // MARK: - Actions
     
     func viewLoaded() {
-        fetchRecentPhotos()
+        fetchRecentImages()
     }
     
     func refreshButtonTapped() {
-        fetchRecentPhotos()
+        fetchRecentImages()
     }
     
     func imageSelected(at indexPath: IndexPath) {
-        print("- indexPath: \(indexPath)")
-    }
-    
-    // MARK: - Public
-    
-    public func getImage(for indexPath: IndexPath) {
-        
+        let selectedImage = images[indexPath.row]
+        let thumbnail = thumbnails[selectedImage.id] as? UIImage
+        didSelectImage?(selectedImage, thumbnail)
     }
     
     // MARK: - Private
     
-    private func fetchRecentPhotos() {        
+    private func fetchRecentImages() {
+        self.images = []
         // set state to loading
         setState { $0 = .loading(message: "Now Loading Recent Photos") }
+        // get recent images
+        flickrService.getRecentImages { response in
+            switch response {
+            case .success(recentImages: let fetchedImages):
+                self.images = fetchedImages
+                self.setState { $0 = fetchedImages.isEmpty ? .noResults : .successfullyFetched(images: fetchedImages) }
+            case .failure(error: let error):
+                self.setState { $0 = .apiError(error: error.localizedDescription) }
+            }
+        }
+    }
+    
+    private func getThumbnail(for indexPath: IndexPath, completion: @escaping (UIImage?) -> Void) {
+        let image = images[indexPath.row]
+        let imageId = image.id
+        let thumbnail = thumbnails[imageId] as? UIImage
+        guard thumbnail == nil else {
+            completion(thumbnail)
+            return
+        }
         
-        // simulating network request
-        DispatchQueue.global().asyncAfter(deadline:  DispatchTime.now() + .seconds(2), qos: .background) {
-            let fetchedImages = [FlickrImage(id: "1", title: "Hello 1", thumbnailUrl: "", fullImageUrl: ""),
-                                 FlickrImage(id: "2", title: "Hello 2", thumbnailUrl: "", fullImageUrl: ""),
-                                 FlickrImage(id: "3", title: "Hello 3", thumbnailUrl: "", fullImageUrl: ""),
-                                 FlickrImage(id: "4", title: "Hello 4", thumbnailUrl: "", fullImageUrl: ""),
-                                 FlickrImage(id: "5", title: "Hello 5", thumbnailUrl: "", fullImageUrl: ""),
-                                 FlickrImage(id: "6", title: "Hello 6", thumbnailUrl: "", fullImageUrl: "")]
-            self.setState { mutableState in
-                switch Int.random(in: 1...3) {
-                case 1: mutableState = .successfullyFetched(images: fetchedImages)
-                case 2: mutableState = .noResults
-                default: mutableState = .apiError(error: "API Error: Couldn't fetch recent photos!")
+        imageService.getImage(from: URL(string: image.thumbnailUrl)!) { response in
+            DispatchQueue.main.async {
+                switch response {
+                case .success(image: let image):
+                    self.thumbnails[imageId] = image
+                    completion(image)
+                case .failure(error: _):
+                    completion(nil)
                 }
             }
         }
+    }
+    
+}
+
+// MARK: - Table View Data Source
+
+extension SelectImageViewModel: UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return images.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = UITableViewCell()
+        
+        cell.textLabel?.text = images[indexPath.row].title
+//        cell.loadingIndicator.start()
+        getThumbnail(for: indexPath) { thumbnail in
+//            cell.loadingIndicator.stop()
+            cell.imageView?.image = thumbnail
+            tableView.reloadRows(at: [indexPath], with: .automatic)
+        }
+        
+        return cell
     }
     
 }
