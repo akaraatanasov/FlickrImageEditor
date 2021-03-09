@@ -10,6 +10,13 @@ import UIKit
 enum ImageError: Error {
     case failedToRetrieveImage
     case failedToDecodeImageFormat
+    
+    var description: String {
+        switch self {
+        case .failedToRetrieveImage: return "Failed to retrieve image."
+        case .failedToDecodeImageFormat: return "Failed to decode image format."
+        }
+    }
 }
 
 enum ImageResponse {

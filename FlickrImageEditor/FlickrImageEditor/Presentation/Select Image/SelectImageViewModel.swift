@@ -107,7 +107,7 @@ extension SelectImageViewModel: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell()
+        let cell = UITableViewCell() // TODO: - Make custom reusable cell
         
         cell.textLabel?.text = images[indexPath.row].title
 //        cell.loadingIndicator.start()
