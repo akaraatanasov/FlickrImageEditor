@@ -85,7 +85,6 @@ final class MainCoordinator: Coordinator {
     }
     
     private func showShareSheet(from sender: Any, using image: UIImage, in navigationController: UINavigationController) {
-        // set up activity view controller
         let imageToShare = [image]
         let activityViewController = UIActivityViewController(activityItems: imageToShare, applicationActivities: nil)
         DispatchQueue.main.async {

@@ -20,9 +20,7 @@ class EditImageViewModel: ViewModel<EditImageState> {
     
     private let imageService: ImageService
     
-    // MARK: - Data
-    
-    private var imageMetadata: FlickrImage
+    private let ciContext: CIContext
     
     // MARK: - State
     
@@ -30,13 +28,19 @@ class EditImageViewModel: ViewModel<EditImageState> {
         return state.receive(on: RunLoop.main).eraseToAnyPublisher()
     }
     
+    var availableFilters: [ImageFilter] {
+        return ImageFilter.allCases
+    }
+    
     // MARK: - Init
     
     init(imageService: ImageService, flickrImage: FlickrImage, thumbnail: UIImage? = nil) {
+        self.ciContext = CIContext(options: nil)
         self.imageService = imageService
-        self.imageMetadata = flickrImage
-        super.init()
-        self.setThumbnailImageIfAvailable(thumbnail: thumbnail)
+        
+        let thumbnailImage = thumbnail ?? UIImage()
+        let initialState = EditImageState(imageMetadata: flickrImage, beginImage: thumbnailImage, displayImage: thumbnailImage)
+        super.init(stateStore: StateStore<EditImageState>(initialState: initialState))
     }
     
     // MARK: - Actions
@@ -46,31 +50,66 @@ class EditImageViewModel: ViewModel<EditImageState> {
     }
     
     func shareButtonTapped(from sender: Any) {
-        getState { self.didShareImage?($0.image, sender) }
+        getState { self.didShareImage?($0.displayImage, sender) }
     }
     
-    // TODO: - Add editing actions
+    func setFilter(value: Float) {
+        self.processSelectedFilter(with: value)
+    }
+    
+    func changeFilter(toFilterWith title: String) {
+        if let filter = ImageFilter(rawValue: title) {
+            setState {
+                $0.selectedFilter = filter        // change filter
+                $0.displayImage = $0.beginImage   // reset displayImage
+            }
+        }
+    }
+    
+    func applyFilter() {
+        setState { $0.beginImage = $0.displayImage }
+        // show loading indicator success
+    }
     
     // MARK: - Private
     
-    private func setThumbnailImageIfAvailable(thumbnail: UIImage?) {
-        if let thumbnail = thumbnail {
-            setState { $0 = EditImageState(title: self.imageMetadata.title, image: thumbnail) }
+    private func processSelectedFilter(with value: Float) {
+        getState { state in
+            let currentFilter = state.selectedFilter.ciFilter
+            currentFilter.setValue(CIImage(image: state.beginImage), forKey: kCIInputImageKey)
+            
+            let inputKeys = currentFilter.inputKeys
+            if inputKeys.contains(kCIInputIntensityKey) { currentFilter.setValue(value, forKey: kCIInputIntensityKey) }
+            if inputKeys.contains(kCIInputRadiusKey) { currentFilter.setValue(value * 100, forKey: kCIInputRadiusKey) }
+            if inputKeys.contains(kCIInputScaleKey) { currentFilter.setValue(value * 10, forKey: kCIInputScaleKey) }
+            if inputKeys.contains(kCIInputCenterKey) { currentFilter.setValue(CIVector(x: state.displayImage.size.width / 2,
+                                                                                       y: state.displayImage.size.height / 2), forKey: kCIInputCenterKey) }
+            guard let output = currentFilter.outputImage,
+                  let cgImage = self.ciContext.createCGImage(output, from: output.extent) else { return }
+            let processedImage = UIImage(cgImage: cgImage)
+            
+            self.setState { $0.displayImage = processedImage }
         }
     }
     
     private func fetchFullSizeImage() {
         setState { $0.isLoading = true } // start loading indicator
-        // get image
-        imageService.getImage(from: URL(string: imageMetadata.fullImageUrl)!) { response in
-            self.setState { $0.isLoading = false } // stop loading indicator
-            
-            switch response {
-            case .success(image: let image):
-                self.setState { $0.image = image }
-            case .failure(error: let error):
-                let errorMessage = error.description
-                self.didFailToFetchImage?(errorMessage)
+        
+        getState {
+            // get image
+            self.imageService.getImage(from: URL(string: $0.imageMetadata.fullImageUrl)!) { response in
+                self.setState { $0.isLoading = false } // stop loading indicator
+                
+                switch response {
+                case .success(image: let image):
+                    self.setState {
+                        $0.beginImage = image
+                        $0.displayImage = image
+                    }
+                case .failure(error: let error):
+                    let errorMessage = error.description
+                    self.didFailToFetchImage?(errorMessage)
+                }
             }
         }
     }
