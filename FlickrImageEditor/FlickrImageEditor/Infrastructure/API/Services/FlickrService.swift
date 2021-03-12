@@ -7,35 +7,6 @@
 
 import Foundation
 
-enum FlickrAPIError: Error {
-    case failedToRetrieveResult
-    case failedToParseResponse
-}
-
-enum RecentsResponse {
-    case success(recentImages: [FlickrImage])
-    case failure(error: FlickrAPIError)
-}
-
-enum Endpoint {
-    case getRecent
-    
-    var path: String {
-        switch self {
-        case .getRecent:
-            let apiKey = Constants.apiKey
-            let extras = [Constants.thumbnailUrlKey, Constants.fullImageUrlKey].joined(separator: ",")
-            return "/services/rest/?method=flickr.photos.getRecent&format=json&api_key=\(apiKey)&extras=\(extras)"
-        }
-    }
-    
-    var asURL: URL {
-        switch self {
-        case .getRecent: return URL(string: self.path, relativeTo: Constants.baseURL)!
-        }
-    }
-}
-
 struct FlickrService {
     
     fileprivate let globalQueue = DispatchQueue.global()
@@ -44,11 +15,16 @@ struct FlickrService {
         URLSession(configuration: .default).dataTask(with: url, completionHandler: completion).resume()
     }
     
-    func getRecentImages(url: URL = Endpoint.getRecent.asURL, withCompletion completionHandler: @escaping (RecentsResponse) -> Void) {
+    func getRecentImages(url: URL = Endpoints.getRecent.asURL, withCompletion completionHandler: @escaping (RecentResponse) -> Void) {
         globalQueue.async(qos: .userInitiated) {
             getResponse(for: url) { (data, urlResponse, error) in
-                guard error == nil, let data = data, let recentImages = recentImagesFrom(data: data) else {
+                guard error == nil, let data = data else {
                     completionHandler(.failure(error: .failedToRetrieveResult))
+                    return
+                }
+                
+                guard let recentImages = FlickrImage.Factory.recentImages(from: data) else {
+                    completionHandler(.failure(error: .failedToParseResponse))
                     return
                 }
 
@@ -56,29 +32,44 @@ struct FlickrService {
             }
         }
     }
+
+}
+
+extension FlickrService {
     
-    private func recentImagesFrom(data: Data) -> [FlickrImage]? {
-        guard let responseString = String(bytes: data, encoding: .utf8) else { return nil }
-        let trimmedJson = String(responseString.dropFirst(14).dropLast())
-        guard let json = trimmedJson.data(using: .utf8) else { return nil }
-
-        var response: Any? = nil
-        do { response = try JSONSerialization.jsonObject(with: json, options:[]) }
-        catch { print("\(error)") }
-
-        guard let responseDictionary = response as? [String : Any],
-              let photosPaged = responseDictionary["photos"] as? [String : Any],
-              let photos = photosPaged["photo"] as? [[String : Any]] else { return nil }
+    enum Constants {
+        static let baseURL = URL(string: "https://api.flickr.com")!
+        static let apiKey = "1c78ca5963fe2eb7e18e6a98e171e2d5"
+        static let thumbnailUrlKey = "url_q"
+        static let fullImageUrlKey = "url_z"
+    }
+    
+    enum Endpoints {
+        case getRecent
         
-        let parsedPhotos = photos.reduce(into: [FlickrImage]()) { parsedArray, photoDictionary in
-            guard let id = photoDictionary["id"] as? String,
-                  let title = photoDictionary["title"] as? String,
-                  let thumbnailUrl = photoDictionary[Constants.thumbnailUrlKey] as? String,
-                  let fullImageUrl = photoDictionary[Constants.fullImageUrlKey] as? String else { return }
-            parsedArray.append(FlickrImage(id: id, title: title, thumbnailUrl: thumbnailUrl, fullImageUrl: fullImageUrl))
+        var path: String {
+            switch self {
+            case .getRecent:
+                let apiKey = FlickrService.Constants.apiKey
+                let extras = [FlickrService.Constants.thumbnailUrlKey, FlickrService.Constants.fullImageUrlKey].joined(separator: ",")
+                return "/services/rest/?method=flickr.photos.getRecent&format=json&api_key=\(apiKey)&extras=\(extras)"
+            }
         }
         
-        return parsedPhotos
+        var asURL: URL {
+            return URL(string: self.path, relativeTo: FlickrService.Constants.baseURL)!
+        }
+
+    }
+    
+    enum FlickrAPIError: Error {
+        case failedToRetrieveResult
+        case failedToParseResponse
+    }
+    
+    enum RecentResponse {
+        case success(recentImages: [FlickrImage])
+        case failure(error: FlickrAPIError)
     }
 
 }

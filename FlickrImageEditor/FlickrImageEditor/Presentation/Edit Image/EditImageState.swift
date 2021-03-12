@@ -35,8 +35,8 @@ struct EditImageState: State {
                                                          title: "",
                                                          thumbnailUrl: "",
                                                          fullImageUrl: ""),
-                              beginImage: UIImage(),
-                              displayImage: UIImage())
+                              beginImage: UIImage.Images.placeholder,
+                              displayImage: UIImage.Images.placeholder)
     }
     
     // MARK: - Properties

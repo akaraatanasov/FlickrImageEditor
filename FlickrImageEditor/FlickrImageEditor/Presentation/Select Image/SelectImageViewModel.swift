@@ -22,7 +22,7 @@ class SelectImageViewModel: ViewModel<SelectImageState> {
     // MARK: - Data
     
     private var images: [FlickrImage]
-    private var thumbnails: [String: UIImage?]
+    private var thumbnails: [String: UIImage]
     
     // MARK: - State
     
@@ -52,7 +52,7 @@ class SelectImageViewModel: ViewModel<SelectImageState> {
     
     func imageSelected(at indexPath: IndexPath) {
         let selectedImage = images[indexPath.row]
-        let thumbnail = thumbnails[selectedImage.id] as? UIImage
+        let thumbnail = thumbnails[selectedImage.id]
         didSelectImage?(selectedImage, thumbnail)
     }
     
@@ -77,7 +77,7 @@ class SelectImageViewModel: ViewModel<SelectImageState> {
     private func getThumbnail(for indexPath: IndexPath, completion: @escaping (UIImage?) -> Void) {
         let image = images[indexPath.row]
         let imageId = image.id
-        let thumbnail = thumbnails[imageId] as? UIImage
+        let thumbnail = thumbnails[imageId]
         guard thumbnail == nil else {
             completion(thumbnail)
             return
@@ -88,10 +88,10 @@ class SelectImageViewModel: ViewModel<SelectImageState> {
                 switch response {
                 case .success(image: let image):
                     self.thumbnails[imageId] = image
-                    completion(image)
                 case .failure(error: _):
-                    completion(nil)
+                    self.thumbnails[imageId] = UIImage.Images.placeholder
                 }
+                completion(self.thumbnails[imageId])
             }
         }
     }

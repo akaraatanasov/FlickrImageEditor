@@ -7,23 +7,6 @@
 
 import UIKit
 
-enum ImageError: Error {
-    case failedToRetrieveImage
-    case failedToDecodeImageFormat
-    
-    var description: String {
-        switch self {
-        case .failedToRetrieveImage: return "Failed to retrieve image."
-        case .failedToDecodeImageFormat: return "Failed to decode image format."
-        }
-    }
-}
-
-enum ImageResponse {
-    case success(image: UIImage)
-    case failure(error: ImageError)
-}
-
 struct ImageService {
     
     fileprivate let globalQueue = DispatchQueue.global()
@@ -50,4 +33,25 @@ struct ImageService {
         }
     }
 
+}
+
+extension ImageService {
+    
+    enum ImageError: Error {
+        case failedToRetrieveImage
+        case failedToDecodeImageFormat
+        
+        var description: String {
+            switch self {
+            case .failedToRetrieveImage: return "Failed to retrieve image."
+            case .failedToDecodeImageFormat: return "Failed to decode image format."
+            }
+        }
+    }
+
+    enum ImageResponse {
+        case success(image: UIImage)
+        case failure(error: ImageError)
+    }
+    
 }

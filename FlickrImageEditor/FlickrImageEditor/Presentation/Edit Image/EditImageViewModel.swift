@@ -38,7 +38,7 @@ class EditImageViewModel: ViewModel<EditImageState> {
         self.ciContext = CIContext(options: nil)
         self.imageService = imageService
         
-        let thumbnailImage = thumbnail ?? UIImage()
+        let thumbnailImage = thumbnail ?? UIImage.Images.placeholder
         let initialState = EditImageState(imageMetadata: flickrImage, beginImage: thumbnailImage, displayImage: thumbnailImage)
         super.init(stateStore: StateStore<EditImageState>(initialState: initialState))
     }

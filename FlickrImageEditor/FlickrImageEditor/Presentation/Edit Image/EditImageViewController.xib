@@ -80,6 +80,7 @@
                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     <constraints>
                         <constraint firstItem="TaI-jB-DYn" firstAttribute="top" secondItem="dGa-An-Jw3" secondAttribute="top" id="22l-eV-P6P"/>
+                        <constraint firstAttribute="height" constant="76" id="4w8-V2-uy6"/>
                         <constraint firstItem="gvA-qO-jE8" firstAttribute="bottom" secondItem="TaI-jB-DYn" secondAttribute="bottom" id="5Ol-jq-2Az"/>
                         <constraint firstItem="gvA-qO-jE8" firstAttribute="top" secondItem="TaI-jB-DYn" secondAttribute="top" id="BQ2-90-Cdg"/>
                         <constraint firstItem="lSh-wl-J3O" firstAttribute="top" secondItem="gvA-qO-jE8" secondAttribute="bottom" constant="16" id="IfK-92-njb"/>
