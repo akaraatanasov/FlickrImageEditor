@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -30,7 +30,10 @@
 		1127367B25F51DE1004F6519 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1127367A25F51DE1004F6519 /* SceneDelegate.swift */; };
 		1127367F25F51DE3004F6519 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1127367E25F51DE3004F6519 /* Assets.xcassets */; };
 		1127368525F51DE3004F6519 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1127368325F51DE3004F6519 /* LaunchScreen.storyboard */; };
+		1190729725FC43FF0020D09F /* ReusableLoadingIndicator in Frameworks */ = {isa = PBXBuildFile; productRef = 1190729625FC43FF0020D09F /* ReusableLoadingIndicator */; };
 		11B1BCFA25FB9BD40025518F /* UIImage+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B1BCF925FB9BD40025518F /* UIImage+Extensions.swift */; };
+		11B1BD0A25FC11410025518F /* SelectImageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B1BD0825FC11410025518F /* SelectImageCell.swift */; };
+		11B1BD0B25FC11410025518F /* SelectImageCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 11B1BD0925FC11410025518F /* SelectImageCell.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,6 +63,8 @@
 		1127368425F51DE3004F6519 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		1127368625F51DE3004F6519 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		11B1BCF925FB9BD40025518F /* UIImage+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Extensions.swift"; sourceTree = "<group>"; };
+		11B1BD0825FC11410025518F /* SelectImageCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectImageCell.swift; sourceTree = "<group>"; };
+		11B1BD0925FC11410025518F /* SelectImageCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SelectImageCell.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1190729725FC43FF0020D09F /* ReusableLoadingIndicator in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -130,6 +136,8 @@
 				1100396725F53E1500E5B58E /* SelectImageViewModel.swift */,
 				1100396E25F53E4D00E5B58E /* SelectImageViewController.swift */,
 				1100396F25F53E4D00E5B58E /* SelectImageViewController.xib */,
+				11B1BD0825FC11410025518F /* SelectImageCell.swift */,
+				11B1BD0925FC11410025518F /* SelectImageCell.xib */,
 			);
 			path = "Select Image";
 			sourceTree = "<group>";
@@ -233,6 +241,9 @@
 			dependencies = (
 			);
 			name = FlickrImageEditor;
+			packageProductDependencies = (
+				1190729625FC43FF0020D09F /* ReusableLoadingIndicator */,
+			);
 			productName = FlickrImageEditor;
 			productReference = 1127367525F51DE1004F6519 /* FlickrImageEditor.app */;
 			productType = "com.apple.product-type.application";
@@ -260,6 +271,9 @@
 				Base,
 			);
 			mainGroup = 1127366C25F51DE1004F6519;
+			packageReferences = (
+				1190729525FC43FF0020D09F /* XCRemoteSwiftPackageReference "ReusableLoadingIndicator" */,
+			);
 			productRefGroup = 1127367625F51DE1004F6519 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -275,6 +289,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1100399125F7FB8F00E5B58E /* EditImageViewController.xib in Resources */,
+				11B1BD0B25FC11410025518F /* SelectImageCell.xib in Resources */,
 				1127368525F51DE3004F6519 /* LaunchScreen.storyboard in Resources */,
 				1100397125F53E4D00E5B58E /* SelectImageViewController.xib in Resources */,
 				1127367F25F51DE3004F6519 /* Assets.xcassets in Resources */,
@@ -298,6 +313,7 @@
 				1100395525F52C5B00E5B58E /* BaseViewModel.swift in Sources */,
 				1100395125F52C4600E5B58E /* BaseViewController.swift in Sources */,
 				1100399025F7FB8F00E5B58E /* EditImageViewController.swift in Sources */,
+				11B1BD0A25FC11410025518F /* SelectImageCell.swift in Sources */,
 				1100396825F53E1500E5B58E /* SelectImageViewModel.swift in Sources */,
 				1100396525F53DF600E5B58E /* SelectImageState.swift in Sources */,
 				1100397925F5657500E5B58E /* UITableView+Extensions.swift in Sources */,
@@ -376,7 +392,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -431,7 +447,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -450,7 +466,7 @@
 				DEVELOPMENT_TEAM = X4FQH6N5F7;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "FlickrImageEditor/Application/Supporting Files/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -471,7 +487,7 @@
 				DEVELOPMENT_TEAM = X4FQH6N5F7;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "FlickrImageEditor/Application/Supporting Files/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -505,6 +521,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1190729525FC43FF0020D09F /* XCRemoteSwiftPackageReference "ReusableLoadingIndicator" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/akaraatanasov/ReusableLoadingIndicator";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1190729625FC43FF0020D09F /* ReusableLoadingIndicator */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1190729525FC43FF0020D09F /* XCRemoteSwiftPackageReference "ReusableLoadingIndicator" */;
+			productName = ReusableLoadingIndicator;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1127366D25F51DE1004F6519 /* Project object */;
 }

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import ReusableLoadingIndicator
 
 class EditImageViewController: ViewController {
     
@@ -14,7 +15,6 @@ class EditImageViewController: ViewController {
     @IBOutlet private weak var titleLabel: UILabel!
     @IBOutlet private weak var imageView: UIImageView!
     
-    @IBOutlet private weak var editingView: UIView!
     @IBOutlet private weak var filterNameLabel: UILabel!
     @IBOutlet private weak var filterIntensitySlider: UISlider!
     @IBOutlet private weak var changeFilterButton: UIButton!
@@ -42,6 +42,12 @@ class EditImageViewController: ViewController {
         setupView()
         viewModel.viewLoaded()
     }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        if LoadingIndicator.isRunning {
+            LoadingIndicator.hide()
+        }
+    }
 
     // This method presents the 3 different ways we can subscribe to state changes:
     override func setupSubscriptions() {
@@ -51,12 +57,6 @@ class EditImageViewController: ViewController {
             .removeDuplicates()
             .assign(to: \.text, on: titleLabel)
             .store(in: &subscriptions)
-        
-        // setup loading subscription
-//        viewModel.statePublisher
-//            .map { Bool($0.isLoading) }
-//            .assign(to: \.isLoading, on: loadingIndicator)
-//            .store(in: &subscriptions)
         
         // setup filter name label subscription (2. With Combine's sink operator)
         viewModel.statePublisher
@@ -71,18 +71,29 @@ class EditImageViewController: ViewController {
         viewModel.selectSubscribe(to: \.displayImage, postInitialValue: true) { [weak self] newImage in
             self?.imageView.image = newImage
         }
+        
+        // setup loading subscription
+        viewModel.selectSubscribe(to: \.isLoading, postInitialValue: false) { isLoading in
+            if isLoading {
+                LoadingIndicator.show(with: EditImageViewModel.Constants.loadingMessage)
+            } else {
+                LoadingIndicator.hide()
+            }
+        }
     }
     
     // MARK: - Private
     
     private func setupView() {
         // setup title
-        title = "Edit Image"
+        title = EditImageViewController.Constants.titleText
         // setup refresh button
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(didTapShareButton(sender:)))
         // setup filter name label
         filterNameLabel.isUserInteractionEnabled = true
         filterNameLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapChangeFilterButton)))
+        // setup filter intensity slider
+        filterIntensitySlider.tintColor = .gray
         // setup change filter button
         changeFilterButton.setTitle("Change Filter", for: .normal)
         changeFilterButton.setTitleColor(.white, for: .normal)
@@ -134,6 +145,16 @@ class EditImageViewController: ViewController {
         UIView.animate(withDuration: 0.2, animations: {
             self.filterIntensitySlider.setValue(0.01, animated:true)
         })
+    }
+    
+}
+
+extension EditImageViewController {
+    
+    enum Constants {
+        
+        static let titleText = "Edit Image"
+        
     }
     
 }

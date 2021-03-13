@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "ReusableLoadingIndicator",
+        "repositoryURL": "https://github.com/akaraatanasov/ReusableLoadingIndicator",
+        "state": {
+          "branch": null,
+          "revision": "2c73794332f25ddcfc821a8007d225d19f06e26c",
+          "version": "1.0.1"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

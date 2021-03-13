@@ -16,7 +16,8 @@ struct ImageService {
     }
     
     func getImage(from url: URL, withCompletion completionHandler: @escaping (ImageResponse) -> Void) {
-        globalQueue.async(qos: .userInitiated) {
+        //        globalQueue.async(qos: .userInitiated) {
+        globalQueue.asyncAfter(deadline: DispatchTime.now() + .seconds(2), qos: .userInitiated) { // added delay for showing off the loading indicator
             getData(from: url) { data, response, error in
                 guard let data = data, error == nil else {
                     completionHandler(.failure(error: .failedToRetrieveImage))

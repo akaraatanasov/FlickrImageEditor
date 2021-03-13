@@ -16,7 +16,8 @@ struct FlickrService {
     }
     
     func getRecentImages(url: URL = Endpoints.getRecent.asURL, withCompletion completionHandler: @escaping (RecentResponse) -> Void) {
-        globalQueue.async(qos: .userInitiated) {
+//        globalQueue.async(qos: .userInitiated) {
+        globalQueue.asyncAfter(deadline: DispatchTime.now() + .seconds(2), qos: .userInitiated) { // added delay for showing off the loading indicator
             getResponse(for: url) { (data, urlResponse, error) in
                 guard error == nil, let data = data else {
                     completionHandler(.failure(error: .failedToRetrieveResult))

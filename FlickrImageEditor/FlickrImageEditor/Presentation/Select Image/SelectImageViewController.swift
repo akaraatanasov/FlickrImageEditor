@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import ReusableLoadingIndicator
 
 class SelectImageViewController: ViewController {
     
@@ -35,6 +36,12 @@ class SelectImageViewController: ViewController {
         setupView()
         viewModel.viewLoaded()
     }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        if LoadingIndicator.isRunning {
+            LoadingIndicator.hide()
+        }
+    }
 
     override func setupSubscriptions() {
         viewModel.statePublisher
@@ -42,18 +49,18 @@ class SelectImageViewController: ViewController {
                 guard let self = self else { return }
                 switch state {
                 case .initial:
-                    self.tableView.setEmptyMessage("Welcome to Flickr Editor!")
+                    self.tableView.setEmptyMessage(SelectImageViewModel.Constants.welcomeMessage)
                 case .loading(message: let message):
-                    // TODO: - Add start loading indicator call
-                    self.tableView.setEmptyMessage(message) // TODO: - Replace with .restore() when adding loading indicator
+                    LoadingIndicator.show(with: message)
+                    self.tableView.restore()
                 case .successfullyFetched(images: _):
-                    // TODO: - Add stop loading indicator call
-                    self.tableView.restore() // TODO: - Remove
+                    LoadingIndicator.hide()
+                    self.tableView.reloadData()
                 case .noResults:
-                    // TODO: - Add stop loading indicator call
-                    self.tableView.setEmptyMessage("No Results!")
+                    LoadingIndicator.hide()
+                    self.tableView.setEmptyMessage(SelectImageViewModel.Constants.noResultsMessage)
                 case .apiError(error: let error):
-                    // TODO: - Add stop loading indicator call
+                    LoadingIndicator.hide()
                     self.tableView.setEmptyMessage(error)
                 }
             })
@@ -64,14 +71,14 @@ class SelectImageViewController: ViewController {
     
     private func setupView() {
         // setup title
-        title = "Select Image"
+        title = SelectImageViewController.Constants.titleText
         // setup refresh button
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(didTapRefreshButton))
         // setup table view
         tableView.delegate = self
-        tableView.dataSource = viewModel
+        tableView.dataSource = self
+        tableView.register(UINib(nibName: Constants.selectImageCell, bundle: .main), forCellReuseIdentifier: Constants.selectImageCell)
     }
-    
     
     // MARK: - Actions
     
@@ -79,6 +86,18 @@ class SelectImageViewController: ViewController {
         viewModel.refreshButtonTapped()
     }
 
+}
+
+extension SelectImageViewController {
+    
+    enum Constants {
+        
+        static let titleText = "Select Image"
+        static let selectImageCell = "SelectImageCell"
+        static let cellHeight: CGFloat = 50.0
+        
+    }
+    
 }
 
 // MARK: - Table View Delegate
@@ -92,6 +111,25 @@ extension SelectImageViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         return UIView()
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return Constants.cellHeight
+    }
+}
+
+// MARK: - Table View Data Source
+
+extension SelectImageViewController: UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return viewModel.imagesCount
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: SelectImageViewController.Constants.selectImageCell, for: indexPath) as! SelectImageCell
+        viewModel.configure(cell, for: indexPath)
+        return cell
     }
     
 }

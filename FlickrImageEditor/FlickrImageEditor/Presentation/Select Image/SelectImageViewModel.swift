@@ -24,6 +24,10 @@ class SelectImageViewModel: ViewModel<SelectImageState> {
     private var images: [FlickrImage]
     private var thumbnails: [String: UIImage]
     
+    var imagesCount: Int {
+        return images.count
+    }
+    
     // MARK: - State
     
     var statePublisher: AnyPublisher<SelectImageState, Never> {
@@ -56,68 +60,94 @@ class SelectImageViewModel: ViewModel<SelectImageState> {
         didSelectImage?(selectedImage, thumbnail)
     }
     
+    // MARK: - Cell Configure Method
+    
+    func configure(_ cell: SelectImageCell, for indexPath: IndexPath) {
+        if !images.isEmpty {
+            cell.imageTitle = images[indexPath.row].title
+        }
+        
+        cell.startLoading()
+        getThumbnail(for: indexPath) { thumbnail in
+            cell.stopLoading()
+            cell.imageThumbnail = thumbnail
+        }
+    }
+    
     // MARK: - Private
     
     private func fetchRecentImages() {
-        self.images = []
-        // set state to loading
-        setState { $0 = .loading(message: "Now Loading Recent Photos") }
-        // get recent images
-        flickrService.getRecentImages { response in
-            switch response {
-            case .success(recentImages: let fetchedImages):
-                self.images = fetchedImages
-                self.setState { $0 = fetchedImages.isEmpty ? .noResults : .successfullyFetched(images: fetchedImages) }
-            case .failure(error: let error):
-                self.setState { $0 = .apiError(error: error.localizedDescription) }
+        getState {
+            // check if not already loading
+            guard $0 != .loading(message: SelectImageViewModel.Constants.loadingMessage) else { return }
+            // set state to loading
+            self.setState { $0 = .loading(message: SelectImageViewModel.Constants.loadingMessage) }
+            // get recent images
+            self.flickrService.getRecentImages { response in
+                switch response {
+                case .success(recentImages: let fetchedImages):
+                    self.images = fetchedImages
+                    self.setState { $0 = fetchedImages.isEmpty ? .noResults : .successfullyFetched(images: fetchedImages) }
+                case .failure(error: let error):
+                    self.setState { $0 = .apiError(error: error.localizedDescription) }
+                }
             }
         }
     }
     
     private func getThumbnail(for indexPath: IndexPath, completion: @escaping (UIImage?) -> Void) {
-        let image = images[indexPath.row]
-        let imageId = image.id
-        let thumbnail = thumbnails[imageId]
-        guard thumbnail == nil else {
-            completion(thumbnail)
+        let placeHolderImage = UIImage.Images.placeholder
+        
+        guard !images.isEmpty else {
+            completion(placeHolderImage)
             return
         }
         
-        imageService.getImage(from: URL(string: image.thumbnailUrl)!) { response in
+        let image = images[indexPath.row]
+        var thumbnailImage: UIImage? {
+            get {
+                return thumbnails[image.id]
+            }
+            set {
+                thumbnails[image.id] = newValue
+            }
+        }
+        
+        // check if not already cached
+        guard thumbnailImage == nil else {
+            // else return cached image
+            completion(thumbnailImage)
+            return
+        }
+        
+        guard let thumbnailUrl = URL(string: image.thumbnailUrl) else {
+            completion(placeHolderImage)
+            return
+        }
+        
+        imageService.getImage(from: thumbnailUrl) { response in
             DispatchQueue.main.async {
                 switch response {
                 case .success(image: let image):
-                    self.thumbnails[imageId] = image
+                    thumbnailImage = image
                 case .failure(error: _):
-                    self.thumbnails[imageId] = UIImage.Images.placeholder
+                    thumbnailImage = placeHolderImage
                 }
-                completion(self.thumbnails[imageId])
+                completion(thumbnailImage)
             }
         }
     }
     
 }
 
-// MARK: - Table View Data Source
-
-extension SelectImageViewModel: UITableViewDataSource {
+extension SelectImageViewModel {
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return images.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell() // TODO: - Make custom reusable cell
+    enum Constants {
         
-        cell.textLabel?.text = images[indexPath.row].title
-//        cell.loadingIndicator.start()
-        getThumbnail(for: indexPath) { thumbnail in
-//            cell.loadingIndicator.stop()
-            cell.imageView?.image = thumbnail
-            tableView.reloadRows(at: [indexPath], with: .automatic)
-        }
+        static let loadingMessage = "Loading Recent Photos"
+        static let noResultsMessage = "No Results!"
+        static let welcomeMessage = "Welcome to Flickr Editor!"
         
-        return cell
     }
     
 }

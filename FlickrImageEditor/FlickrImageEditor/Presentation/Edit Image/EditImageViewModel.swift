@@ -115,3 +115,13 @@ class EditImageViewModel: ViewModel<EditImageState> {
     }
     
 }
+
+extension EditImageViewModel {
+    
+    enum Constants {
+        
+        static let loadingMessage = "Loading Full Image"
+        
+    }
+    
+}

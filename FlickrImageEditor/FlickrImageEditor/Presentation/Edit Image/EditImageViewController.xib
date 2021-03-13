@@ -2,6 +2,7 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_0" orientation="portrait" appearance="light"/>
     <dependencies>
+        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="Stack View standard spacing" minToolsVersion="9.0"/>
@@ -13,7 +14,6 @@
             <connections>
                 <outlet property="applyFilterButton" destination="ePG-j6-DDP" id="oKN-14-kdt"/>
                 <outlet property="changeFilterButton" destination="BjM-w7-LY6" id="mIc-or-y3y"/>
-                <outlet property="editingView" destination="dGa-An-Jw3" id="Vi3-pR-rpp"/>
                 <outlet property="filterIntensitySlider" destination="TaI-jB-DYn" id="eTy-GP-YYv"/>
                 <outlet property="filterNameLabel" destination="gvA-qO-jE8" id="wnK-ah-kPu"/>
                 <outlet property="imageView" destination="Oyo-LZ-OMc" id="979-8c-4CS"/>
